@@ -16,7 +16,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-slate-100 border-t border-slate-700/50 mt-auto overflow-hidden">
+    <footer className="relative bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-slate-100 border-t border-slate-700/50 w-full overflow-hidden">
       {/* Animated background gradient accent */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl animate-pulse"></div>
