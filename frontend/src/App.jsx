@@ -1,8 +1,8 @@
 import "./App.css";
 import Header from "./assets/components/Header";
 import Main from "./assets/components/Main";
-import Prediction from "./assets/components/Prediction";
 import Footer from "./assets/components/Footer";
+import DpWindow from "./assets/components/dpWindow";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Dashboard from "./assets/components/Dashboard";
 import ContactDoctor from "./assets/components/ContactDoctor";
@@ -13,7 +13,13 @@ function App() {
       <Header />
       <div className="pt-16">
       <Routes>
-        <Route path="/predictor" element={<Prediction />} />
+        <Route path="/predictor" element={
+          <ProtectedRoute>
+            <main className="flex flex-col items-center min-h-screen pt-10">
+              <DpWindow/>
+            </main>
+          </ProtectedRoute>
+        } />
         <Route path="/" element={<Main />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>

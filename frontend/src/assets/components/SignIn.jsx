@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useGlobalContext } from "./context";
+import API_BASE_URL from "../../config";
 
 const SignIn = () => {
   const {
@@ -9,6 +10,8 @@ const SignIn = () => {
     password,
     submitLogin,
     submitRegistration,
+    registrationToggle,
+    setRegistrationToggle,
   } = useGlobalContext();
 
   const userObject = useRef(null);
@@ -26,7 +29,7 @@ const SignIn = () => {
 
       // Check if email exists in backend
       const fetchResponse = await fetch(
-        `http://127.0.0.1:8000/check_email?email=${decoded.email}`
+        `${API_BASE_URL}/check_email?email=${decoded.email}`
       );
 
       const data = await fetchResponse.json();
@@ -64,8 +67,25 @@ const SignIn = () => {
   }, []);
 
   return (
-    <div className="flex justify-center items-center min-h-[200px]">
-      <div id="signInDiv"></div>
+    <div className="flex flex-col gap-4 items-center w-full">
+      {/* Toggle Button */}
+      <button
+        type="button"
+        onClick={() => setRegistrationToggle(!registrationToggle)}
+        className="text-sm text-slate-600 hover:text-cyan-600 transition underline"
+      >
+        {registrationToggle ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+      </button>
+
+      {/* Divider */}
+      <div className="w-full flex items-center gap-2">
+        <div className="flex-1 border-t border-slate-200"></div>
+        <span className="text-xs text-slate-500">or</span>
+        <div className="flex-1 border-t border-slate-200"></div>
+      </div>
+
+      {/* Google Sign-In */}
+      <div id="signInDiv" className="flex justify-center"></div>
     </div>
   );
 };

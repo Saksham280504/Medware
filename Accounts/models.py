@@ -102,9 +102,12 @@ class PatientProfile(models.Model):
 class DoctorProfile(models.Model):
     name = models.CharField(max_length=200, default="NA")
     speciality = models.CharField(max_length=200, default="NA")
-    sex = models.CharField(max_length=200, default="NA")
+    gender = models.CharField(max_length=200, default="NA")
     experience = models.IntegerField(default=0)
-    work_address = models.CharField(max_length=200, default="NA")
+    address = models.CharField(max_length=200, default="NA")
+    city = models.CharField(max_length=100, default="NA")
+    state = models.CharField(max_length=100, default="NA")
+    country = models.CharField(max_length=100, default="NA")
     mobile_no = models.CharField(max_length=20, default="0000000000")
     image_link = models.URLField(max_length=200, blank=True)
     profile_link = models.URLField(max_length=200, blank=True)
@@ -144,6 +147,8 @@ class SymptomsDiseases(models.Model):
 # Predicted Diseases
 # =========================
 class PredictedDiseases(models.Model):
+    user = models.OneToOneField(AppUser, on_delete=models.CASCADE, null=True, blank=True)
+
     diseases = ArrayField(
         models.CharField(max_length=200),
         blank=True,

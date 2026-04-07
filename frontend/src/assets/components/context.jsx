@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import axios from "axios";
+import API_BASE_URL from "../../config";
 
 const GlobalContext = React.createContext();
 
@@ -8,7 +9,8 @@ axios.defaults.xsrfHeaderName = "X-CSRFToken";
 axios.defaults.withCredentials = true;
 
 const client = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: API_BASE_URL,
+  withCredentials: true,
 });
 
 const AppProvider = ({ children }) => {
@@ -66,6 +68,7 @@ const AppProvider = ({ children }) => {
   const [responseCall, setResponseCall] = useState(false);
   const [registrationToggle, setRegistrationToggle] = useState(false);
   const [loginButtonClicked, setLoginButtonClicked] = useState(false);
+  const [redirectTo, setRedirectTo] = useState(null);
 
   const email = useRef("");
   const username = useRef("");
@@ -76,7 +79,7 @@ const AppProvider = ({ children }) => {
   const [medicalhistory, setMedicalHistory] = useState([]);
   const [sex, setSex] = useState("");
 
-  const url = "http://127.0.0.1:8000/patient";
+  const url = `${API_BASE_URL}/patient`;
 
   const [data, setData] = useState({});
   const [formData, setFormData] = useState({
@@ -85,19 +88,21 @@ const AppProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    client.get("/user/")
-      .then(() => setCurrentUser(true))
-      .catch(() => setCurrentUser(false));
+    // Only check session if user previously logged in
+    const hasSession = localStorage.getItem("userSession");
+
+    if (hasSession) {
+      client.get("/user/")
+        .then(() => setCurrentUser(true))
+        .catch(() => {
+          setCurrentUser(false);
+          localStorage.removeItem("userSession");
+        });
+    }
   }, []);
 
   function update_form_btn() {
-    if (registrationToggle) {
-      document.getElementById("form_btn").innerHTML = "Register";
-      setRegistrationToggle(false);
-    } else {
-      document.getElementById("form_btn").innerHTML = "Log in";
-      setRegistrationToggle(true);
-    }
+    setRegistrationToggle(!registrationToggle);
     setLoginButtonClicked(true);
   }
 
@@ -121,8 +126,10 @@ const AppProvider = ({ children }) => {
       });
     })
     .then(() => {
+      localStorage.setItem("userSession", "true");
       setCurrentUser(true);
       setResponseCall(false);
+      closeModal();
     })
     .catch((err) => {
       console.log(err);
@@ -135,14 +142,20 @@ const AppProvider = ({ children }) => {
     setResponseCall(true);
 
     try {
-      await client.post("/login/", {
+      const response = await client.post("/login/", {
         email: email.current,
         password: password.current,
       });
 
+      console.log("Login successful, response:", response.data);
+      console.log("Cookies:", document.cookie);
+
+      localStorage.setItem("userSession", "true");
       setCurrentUser(true);
       error.current = "";
+      closeModal();
     } catch(err) {
+        console.error("Login failed:", err);
         error.current = "Wrong email or password.";
     } finally {
       setResponseCall(false);
@@ -151,7 +164,20 @@ const AppProvider = ({ children }) => {
 
   function submitLogout() {
     client.post("/logout/")
-      .then(() => setCurrentUser(false));
+      .then(() => {
+        localStorage.removeItem("userSession");
+        setCurrentUser(false);
+      });
+  }
+
+  function openRegister() {
+    setRegistrationToggle(true);
+    setLoginButtonClicked(true);
+  }
+
+  function openLogin() {
+    setRegistrationToggle(false);
+    setLoginButtonClicked(true);
   }
 
   const fetchData = async () => {
@@ -163,15 +189,50 @@ const AppProvider = ({ children }) => {
     }
   };
 
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleFormSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      setResponseCall(true);
+      await client.put("/patient/", formData);
+      setResponseCall(false);
+      fetchData();
+    } catch (error) {
+      console.log(error);
+      setResponseCall(false);
+    }
+  };
+
+  const submitRegistration_with_cleanup = async (e) => {
+    await submitRegistration(e);
+    email.current = "";
+    username.current = "";
+    password.current = "";
+  };
+
+  const submitLogin_with_cleanup = async (e) => {
+    await submitLogin(e);
+    email.current = "";
+    password.current = "";
+  };
+
   return (
     <GlobalContext.Provider
       value={{
         update_form_btn,
-        submitRegistration,
-        submitLogin,
+        submitRegistration: submitRegistration,
+        submitLogin: submitLogin_with_cleanup,
         submitLogout,
         currentUser,
         registrationToggle,
+        setRegistrationToggle,
         email,
         username,
         password,
@@ -182,6 +243,7 @@ const AppProvider = ({ children }) => {
         sex,
         setSex,
         loginButtonClicked,
+        setLoginButtonClicked,
         closeModal,
         options,
         formData,
@@ -189,8 +251,12 @@ const AppProvider = ({ children }) => {
         data,
         setData,
         fetchData,
+        handleInputChange,
+        handleFormSubmit,
         error,
         responseCall,
+        redirectTo,
+        setRedirectTo,
       }}
     >
       {children}

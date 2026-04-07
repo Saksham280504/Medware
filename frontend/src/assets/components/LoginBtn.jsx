@@ -2,7 +2,7 @@ import React from "react";
 import { useGlobalContext } from "./context";
 import { useNavigate } from "react-router-dom";
 
-const LoginBtn = () => {
+const LoginBtn = ({ mode } = {}) => {
   const { submitLogout, update_form_btn, currentUser } =
     useGlobalContext();
 
@@ -13,7 +13,10 @@ const LoginBtn = () => {
     navigate("/");
   };
 
-  if (currentUser) {
+  // If mode is explicitly provided, use it; otherwise determine from currentUser
+  const isLogout = mode ? mode === "logout" : currentUser;
+
+  if (isLogout) {
     return (
       <button
         onClick={handleLogout}

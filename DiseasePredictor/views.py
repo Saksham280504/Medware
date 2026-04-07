@@ -5,8 +5,10 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.authentication import SessionAuthentication
 import csv
 from django.db import transaction
 import os
@@ -14,6 +16,21 @@ import pickle
 
 
 MODEL_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "model.pkl")
+
+
+# =====================================================
+# HEALTH CHECK - DEBUG ENDPOINT
+# =====================================================
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def health_check(request):
+    """Debug endpoint to verify authentication status"""
+    user_info = {
+        "is_authenticated": request.user.is_authenticated,
+        "user": str(request.user) if request.user else "AnonymousUser",
+        "session_key": request.session.session_key,
+    }
+    return Response(user_info)
 
 
 # =====================================================
@@ -36,13 +53,13 @@ def insert_patient_data(request):
 
                 field_names = [
                     field.name
-                    for field in symptoms_diseases._meta.get_fields()
+                    for field in SymptomsDiseases._meta.get_fields()
                     if field.name not in ["id", "prognosis"]
                 ]
 
                 field_values = dict(zip(field_names, symptom_values))
 
-                symptoms_diseases.objects.create(
+                SymptomsDiseases.objects.create(
                     prognosis=prognosis,
                     **field_values
                 )
@@ -68,9 +85,9 @@ def scale_dataset(dataframe, oversample=False):
 # TRAIN MODEL
 # =====================================================
 def train(request):
-    data = pd.DataFrame.from_records(
-        symptoms_diseases.objects.all().values()
-    ).drop("id", axis=1)
+    # Load training data directly from CSV file (all 129 symptoms)
+    csv_path = os.path.join(os.path.dirname(__file__), 'Training.csv')
+    data = pd.read_csv(csv_path)
 
     _, X, Y = scale_dataset(data)
 
@@ -87,65 +104,92 @@ def train(request):
 # PREDICT DISEASE
 # =====================================================
 @api_view(["GET"])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 def predict(request, symptoms=""):
-    if not os.path.exists(MODEL_PATH):
-        return Response({"error": "Model not trained yet."})
+    try:
+        # Debug: Check if user is authenticated
+        if not request.user.is_authenticated:
+            return Response(
+                {"error": "User not authenticated. Session may be invalid."},
+                status=401
+            )
 
-    with open(MODEL_PATH, "rb") as f:
-        svm_model = pickle.load(f)
+        if not os.path.exists(MODEL_PATH):
+            return Response({"error": "Model not trained yet."})
 
-    # Convert symptoms string (binary format expected)
-    x = np.asarray(list(symptoms), dtype=np.int_)
-    x = x.reshape(1, -1)
+        with open(MODEL_PATH, "rb") as f:
+            svm_model = pickle.load(f)
 
-    Y_ = svm_model.predict(x)
-    probas = svm_model.predict_proba(x)
+        # Convert symptoms string (binary format expected)
+        x = np.asarray(list(symptoms), dtype=np.int_)
+        x = x.reshape(1, -1)
 
-    top5_indices = np.argsort(probas, axis=1)[:, -5:]
-    top5_values = np.take_along_axis(probas, top5_indices, axis=1)
-    top5_labels = svm_model.classes_[top5_indices]
+        Y_ = svm_model.predict(x)
+        probas = svm_model.predict_proba(x)
 
-    pd_list = top5_labels[0][::-1].tolist()
-    predicted_disease = pd_list[0]
-    pd_prob = top5_values[0][::-1].astype(float).tolist()
+        top5_indices = np.argsort(probas, axis=1)[:, -5:]
+        top5_values = np.take_along_axis(probas, top5_indices, axis=1)
+        top5_labels = svm_model.classes_[top5_indices]
 
-    # =====================================================
-    # DOCTOR MAPPING
-    # =====================================================
-    doctor_map = {
-        "Rheumatologist": ["Osteoarthristis", "Arthritis"],
-        "Cardiologist": ["Heart attack", "Bronchial Asthma", "Hypertension"],
-        "ENT specialist": ["(vertigo) Paroymsal Positional Vertigo", "Hypothyroidism"],
-        "Neurologist": ["Varicose veins", "Paralysis (brain hemorrhage)", "Migraine"],
-        "Allergist/Immunologist": ["Allergy", "Pneumonia", "AIDS", "Common Cold"],
-        "Urologist": ["Urinary tract infection"],
-        "Dermatologist": ["Acne", "Chicken pox", "Fungal infection", "Psoriasis", "Impetigo"],
-        "Gastroenterologist": [
-            "Peptic ulcer diseae", "GERD", "Chronic cholestasis",
-            "Alcoholic hepatitis", "Jaundice",
-            "Hepatitis B", "Hepatitis C"
-        ],
-    }
+        pd_list = top5_labels[0][::-1].tolist()
+        predicted_disease = pd_list[0]
+        pd_prob = top5_values[0][::-1].astype(float).tolist()
 
-    consultdoctor = "Other"
+        # =====================================================
+        # DOCTOR MAPPING
+        # =====================================================
+        doctor_map = {
+            "Rheumatologist": ["Osteoarthristis", "Arthritis"],
+            "Cardiologist": ["Heart attack", "Bronchial Asthma", "Hypertension"],
+            "ENT specialist": ["(vertigo) Paroymsal Positional Vertigo", "Hypothyroidism"],
+            "Neurologist": ["Varicose veins", "Paralysis (brain hemorrhage)", "Migraine"],
+            "Allergist/Immunologist": ["Allergy", "Pneumonia", "AIDS", "Common Cold"],
+            "Urologist": ["Urinary tract infection"],
+            "Dermatologist": ["Acne", "Chicken pox", "Fungal infection", "Psoriasis", "Impetigo"],
+            "Gastroenterologist": [
+                "Peptic ulcer diseae", "GERD", "Chronic cholestasis",
+                "Alcoholic hepatitis", "Jaundice",
+                "Hepatitis B", "Hepatitis C"
+            ],
+        }
 
-    for doctor, diseases in doctor_map.items():
-        if predicted_disease in diseases:
-            consultdoctor = doctor
-            break
+        consultdoctor = "Other"
 
-    # =====================================================
-    # SAVE PREDICTION
-    # =====================================================
-    PredictedDiseases.objects.all().delete()
+        for doctor, diseases in doctor_map.items():
+            if predicted_disease in diseases:
+                consultdoctor = doctor
+                break
 
-    PredictedDiseases.objects.create(
-        diseases=pd_list,
-        diseases_prob=pd_prob,
-        consult_doctor=consultdoctor
-    )
+        # =====================================================
+        # SAVE PREDICTION (per user, not global)
+        # =====================================================
+        user = request.user if request.user.is_authenticated else None
 
-    data = PredictedDiseases.objects.all()
-    serializer = PredictionSerializer(data, many=True)
+        if user:
+            PredictedDiseases.objects.filter(user=user).delete()
+            PredictedDiseases.objects.create(
+                user=user,
+                diseases=pd_list,
+                diseases_prob=pd_prob,
+                consult_doctor=consultdoctor
+            )
+            data = PredictedDiseases.objects.filter(user=user)
+        else:
+            data = [PredictedDiseases(
+                diseases=pd_list,
+                diseases_prob=pd_prob,
+                consult_doctor=consultdoctor
+            )]
 
-    return Response(serializer.data)
+        serializer = PredictionSerializer(data, many=True)
+
+        return Response(serializer.data)
+    except Exception as e:
+        import traceback
+        error_msg = f"Prediction error: {str(e)}\n{traceback.format_exc()}"
+        print(error_msg)
+        return Response(
+            {"error": str(e), "details": traceback.format_exc()},
+            status=500
+        )

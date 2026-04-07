@@ -15,27 +15,27 @@ const Modal = () => {
       {responseCall && (
         <div className="fixed top-0 left-0 w-screen h-screen flex flex-col items-center justify-center bg-black/40 z-50">
           <div className="flex flex-col items-center gap-4">
-            <div className="rounded-full h-16 w-16 border-4 border-teal-600 border-t-transparent animate-spin"></div>
-            <div className="w-24 h-2 bg-teal-700 rounded-lg animate-pulse"></div>
+            <div className="rounded-full h-16 w-16 border-4 border-cyan-600 border-t-transparent animate-spin"></div>
+            <div className="w-24 h-2 bg-cyan-600 rounded-lg animate-pulse"></div>
           </div>
         </div>
       )}
 
       {/* Modal Overlay */}
-      <div className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center bg-black/40 z-40">
-        <div className="flex justify-center items-center w-80 sm:w-96 bg-white rounded-xl shadow-lg p-6 relative">
-          
+      <div className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center bg-black/40 z-40 p-4">
+        <div className="flex w-full max-w-5xl bg-white rounded-2xl shadow-2xl p-6 md:p-8 relative max-h-[95vh] overflow-y-auto">
+
           {/* Side Illustration (Desktop only) */}
-          <figure className="hidden xl:block w-80 mr-6">
+          <figure className="hidden xl:flex w-1/3 flex-shrink-0 mr-8 items-center justify-center">
             <img
               src={ModalImg}
               alt="Modal Illustration"
-              className="w-full"
+              className="w-full h-auto"
             />
           </figure>
 
           {/* Form */}
-          <div className="w-full">
+          <div className="w-full xl:w-2/3">
             {registrationToggle ? <RegisterForm /> : <LoginForm />}
           </div>
 

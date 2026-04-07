@@ -1,0 +1,5 @@
+1. I am on the predictor page, and I trying to use the predictor model, as you can see I added some symptoms and as I clicked on the Get Prediction. Following pops us on my console. 127.0.0.1:8000/prediction/0000001100100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000/:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+dpWindow.jsx:98 AxiosError: Request failed with status code 403
+    at settle (axios.js?v=d0995a39:1281:12)
+    at XMLHttpRequest.onloadend (axios.js?v=d0995a39:1638:7)
+    at Axios.request (axios.js?v=d0995a39:2255:41)

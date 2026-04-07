@@ -47,11 +47,17 @@ class UserLogin(APIView):
 
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
-        print(request.data)
+        print(f"Login attempt with data: {request.data}")
 
         if serializer.is_valid(raise_exception=True):
             user = serializer.validated_data["user"]
             login(request, user)
+
+            # Ensure session is saved
+            request.session.save()
+            print(f"Session created: {request.session.session_key}")
+            print(f"User authenticated: {request.user}")
+
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(

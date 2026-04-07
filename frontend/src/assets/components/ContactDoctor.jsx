@@ -3,6 +3,7 @@ import axios from "axios";
 import DoctorProfile from "./DoctorProfile";
 import SkeletonLoader from "./SkeletonLoader";
 import { Autocomplete, TextField } from "@mui/material";
+import API_BASE_URL from "../../config";
 
 const docOptions = [
   "Family Medicine",
@@ -38,7 +39,7 @@ const ContactDoctor = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `http://127.0.0.1:8000/doctor/${doctorType.current}`
+        `${API_BASE_URL}/doctor/${doctorType.current}`
       );
       setDoctors(response.data);
     } catch (error) {

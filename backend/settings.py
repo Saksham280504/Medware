@@ -33,9 +33,22 @@ CSRF_COOKIE_NAME = 'csrftoken'
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -118,6 +131,12 @@ DATABASES = {
 
 
 AUTH_USER_MODEL = 'Accounts.AppUser'
+
+# Session configuration
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 604800  # 7 days in seconds
+SESSION_SAVE_EVERY_REQUEST = True  # Save session on every request
+
 REST_FRAMEWORK = {
  'DEFAULT_PERMISSION_CLASSES': (
  'rest_framework.permissions.IsAuthenticated',
@@ -158,6 +177,17 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+
+# Session Cookie Configuration for Frontend Persistence
+SESSION_COOKIE_HTTPONLY = False  # Allow JS access for axios session verification
+SESSION_COOKIE_SAMESITE = 'Lax'  # Works with HTTP on localhost
+SESSION_COOKIE_SECURE = False  # Set True when HTTPS enabled (production)
+SESSION_COOKIE_AGE = 86400 * 7  # 7 days session expiration
+SESSION_COOKIE_DOMAIN = None  # Allow all domains in development
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'  # Works with HTTP on localhost
+CSRF_COOKIE_DOMAIN = None
 
 
 # Static files (CSS, JavaScript, Images)
