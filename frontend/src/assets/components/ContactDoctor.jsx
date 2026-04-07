@@ -65,47 +65,70 @@ const ContactDoctor = () => {
   };
 
   return (
-    <section className="w-full flex flex-col items-center py-10 px-4">
+    <section className="w-full flex flex-col items-center py-10 px-4 bg-gradient-to-b from-slate-50 via-blue-50/50 to-slate-50 min-h-screen">
+
+      {/* Header Section */}
+      <div className="text-center mb-12 animate-fade-in-down" style={{animationDelay: "0.1s"}}>
+        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-3">
+          Find Healthcare Professionals
+        </h1>
+        <p className="text-slate-600 text-lg">
+          Search and connect with experienced doctors in your speciality
+        </p>
+      </div>
 
       {/* Search Section */}
-      <div className="flex flex-col md:flex-row w-full max-w-3xl justify-center gap-4 items-center">
-        <Autocomplete
-          options={docOptions}
-          value={speciality}
-          onChange={(e, newValue) => setSpeciality(newValue)}
-          className="w-full bg-white rounded-md"
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Select a speciality..."
-              variant="outlined"
-              color="primary"
-            />
-          )}
-        />
+      <div className="flex flex-col md:flex-row w-full max-w-3xl justify-center gap-4 items-center mb-8 animate-fade-in-up" style={{animationDelay: "0.15s"}}>
+        <div className="w-full bg-white rounded-lg border border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300">
+          <Autocomplete
+            options={docOptions}
+            value={speciality}
+            onChange={(e, newValue) => setSpeciality(newValue)}
+            className="w-full"
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Select a speciality..."
+                variant="outlined"
+                color="primary"
+              />
+            )}
+          />
+        </div>
 
         <button
           onClick={handleDocChange}
           disabled={loading}
-          className="w-28 bg-teal-600 text-white font-semibold py-2 rounded-md hover:bg-teal-700 transition disabled:opacity-50"
+          className="px-8 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 disabled:opacity-50 md:w-auto whitespace-nowrap"
         >
-          {loading ? "Searching..." : "Search"}
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              Searching...
+            </span>
+          ) : (
+            "Search"
+          )}
         </button>
       </div>
 
       {/* Divider */}
-      <div className="border-t border-gray-200 my-8 w-4/5"></div>
+      <div className="border-t-2 border-slate-300 my-8 w-full max-w-4xl opacity-50"></div>
 
       {/* Results Section */}
       <div className="flex justify-center w-full">
         {loading ? (
-          <SkeletonLoader />
+          <div className="animate-fade-in">
+            <SkeletonLoader />
+          </div>
         ) : doctors.length > 0 ? (
-          <DoctorProfile doctors={doctors} />
+          <div className="animate-fade-in-up" style={{animationDelay: "0.2s"}}>
+            <DoctorProfile doctors={doctors} />
+          </div>
         ) : (
-          <p className="text-gray-500 italic">
-            No doctors found for this speciality.
-          </p>
+          <div className="text-slate-600 italic text-lg py-12 animate-fade-in">
+            No doctors found for this speciality. Try another speciality!
+          </div>
         )}
       </div>
 
