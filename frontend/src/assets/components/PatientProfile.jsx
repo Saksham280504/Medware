@@ -45,11 +45,11 @@ const PatientProfile = ({ responseData }) => {
     return <p className="text-center mt-10">Loading...</p>;
 
   return (
-    <div className="flex flex-col items-center w-full px-4">
-      <div className="w-full flex flex-wrap justify-center gap-4">
+    <div className="flex flex-col items-center w-full px-4 pb-8">
+      <div className="w-full flex flex-wrap justify-center gap-6">
 
         {/* Sidebar */}
-        <div className="bg-gray-800 w-full sm:w-1/5 p-2 rounded-lg">
+        <div className="w-full sm:w-1/5 animate-fade-in-left" style={{animationDelay: "0.1s"}}>
           <Sidebar
             setRecord={setRecord}
             setLogModal={setLogModal}
@@ -59,21 +59,21 @@ const PatientProfile = ({ responseData }) => {
         </div>
 
         {/* Main Content */}
-        <div className="w-full sm:w-4/5 flex flex-col gap-4">
+        <div className="w-full sm:w-4/5 flex flex-col gap-6">
 
           {/* Greeting + BMI */}
-          <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow">
+          <div className="flex justify-between items-center bg-gradient-to-r from-white to-blue-50 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100 animate-fade-in-down" style={{animationDelay: "0.15s"}}>
             <div>
-              <p className="text-xl font-semibold">
+              <p className="text-xl font-semibold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                 Hi, {first_name} {last_name}
               </p>
               <p className="text-gray-600">Check your health!</p>
             </div>
 
-            <div className="flex items-center gap-2">
-              <p className="font-semibold">BMI</p>
+            <div className="flex items-center gap-3 group">
+              <p className="font-semibold text-slate-700">BMI</p>
               <div
-                className={`w-14 h-12 flex items-center justify-center text-white rounded-lg ${bmiColor}`}
+                className={`w-16 h-14 flex items-center justify-center text-white rounded-lg font-bold text-lg ${bmiColor} shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}
               >
                 {bmi ? bmi.toFixed(1) : "--"}
               </div>
@@ -81,28 +81,28 @@ const PatientProfile = ({ responseData }) => {
           </div>
 
           {/* Charts */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="bg-white rounded-lg p-2 shadow">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 animate-fade-in-up" style={{animationDelay: "0.2s"}}>
               <BP_chart chartData={responseData.bp_log} />
             </div>
 
-            <div className="bg-white rounded-lg p-2 shadow">
+            <div className="bg-white rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 animate-fade-in-up" style={{animationDelay: "0.25s"}}>
               <SugarChart chartData={responseData.blood_glucose} />
             </div>
           </div>
 
           {/* Personal Info */}
-          <div className="bg-white rounded-lg p-4 shadow">
+          <div className="bg-gradient-to-br from-white to-cyan-50 rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-cyan-100 animate-fade-in-up" style={{animationDelay: "0.3s"}}>
             <Personal responseData={responseData} />
           </div>
 
           {/* Calendar + Medical History */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="bg-white rounded-lg p-4 shadow">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 animate-fade-in-up" style={{animationDelay: "0.35s"}}>
               <Calendar />
             </div>
 
-            <div className="bg-white rounded-lg p-4 shadow">
+            <div className="bg-white rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 animate-fade-in-up" style={{animationDelay: "0.4s"}}>
               <MedicalHistory
                 data={responseData.medical_history}
               />
@@ -110,16 +110,16 @@ const PatientProfile = ({ responseData }) => {
           </div>
 
           {/* Logs */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="bg-white rounded-lg p-4 shadow">
-              <h2 className="font-semibold mb-2">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100 animate-fade-in-up" style={{animationDelay: "0.45s"}}>
+              <h2 className="font-semibold mb-2 bg-gradient-to-r from-blue-900 to-blue-700 bg-clip-text text-transparent">
                 Glucose
               </h2>
               <GlucoseLevel responseData={responseData} />
             </div>
 
-            <div className="bg-white rounded-lg p-4 shadow">
-              <h2 className="font-semibold mb-2">
+            <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-orange-100 animate-fade-in-up" style={{animationDelay: "0.5s"}}>
+              <h2 className="font-semibold mb-2 bg-gradient-to-r from-red-900 to-red-700 bg-clip-text text-transparent">
                 Blood Pressure
               </h2>
               <BP_Log responseData={responseData} />

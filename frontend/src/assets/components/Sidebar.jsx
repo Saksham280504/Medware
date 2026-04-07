@@ -11,34 +11,34 @@ const Sidebar = ({
   setConsumptionModal,
 }) => {
   return (
-    <div className="flex sm:flex-col gap-6 justify-center items-center bg-white p-4 rounded-xl shadow-md">
+    <div className="flex sm:flex-col gap-4 justify-center items-center bg-gradient-to-br from-white to-blue-50 p-6 rounded-xl shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300">
 
       <button
         onClick={() => setProfileModal(true)}
-        className="w-10 h-10 p-1 hover:scale-90 hover:cursor-pointer transition"
+        className="w-12 h-12 p-2.5 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg hover:scale-110 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300 transform active:scale-95 group"
       >
-        <img src={profileIcon} alt="Profile" className="w-full" />
+        <img src={profileIcon} alt="Profile" className="w-full filter brightness-0 invert" />
       </button>
 
       <button
         onClick={() => setRecord(true)}
-        className="w-10 h-10 p-1 hover:scale-90 hover:cursor-pointer transition"
+        className="w-12 h-12 p-2.5 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg hover:scale-110 hover:shadow-lg hover:shadow-purple-400/50 transition-all duration-300 transform active:scale-95 group"
       >
-        <img src={recordIcon} alt="Medical Record" className="w-full" />
+        <img src={recordIcon} alt="Medical Record" className="w-full filter brightness-0 invert" />
       </button>
 
       <button
         onClick={() => setLogModal(true)}
-        className="w-10 h-10 p-1.5 hover:scale-90 hover:cursor-pointer transition"
+        className="w-12 h-12 p-2.5 bg-gradient-to-br from-orange-400 to-red-400 rounded-lg hover:scale-110 hover:shadow-lg hover:shadow-orange-400/50 transition-all duration-300 transform active:scale-95 group"
       >
-        <img src={settingsIcon} alt="Settings" className="w-full" />
+        <img src={settingsIcon} alt="Settings" className="w-full filter brightness-0 invert" />
       </button>
 
       <button
         onClick={() => setConsumptionModal(true)}
-        className="w-9 h-9 p-1 hover:scale-90 hover:cursor-pointer transition"
+        className="w-12 h-12 p-2.5 bg-gradient-to-br from-green-400 to-emerald-400 rounded-lg hover:scale-110 hover:shadow-lg hover:shadow-green-400/50 transition-all duration-300 transform active:scale-95 group"
       >
-        <img src={consumptionIcon} alt="Consumption" className="w-full" />
+        <img src={consumptionIcon} alt="Consumption" className="w-full filter brightness-0 invert" />
       </button>
 
     </div>
